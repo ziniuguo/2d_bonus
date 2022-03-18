@@ -1,0 +1,59 @@
+import math
+import random
+from time import time
+
+
+def papa(clause_pairs):
+    """
+    Papadimitriou's 2SAT algorithm using the principle of local search.
+
+    Pick a random assignment of the variables and test the satisfiability,
+    if satisfied return satisfiable, otherwise randomly choose a failed
+    clause and randomly choose one of its two variable and flip its value.
+    """
+    var = set()
+    for i in clause_pairs:
+        for j in i:
+            var.add(abs(j))
+    print("length (converted to int): " + str(var))
+    for i in range(int(math.log(len(var), 2))):  # reasonable cycles. reference slides
+        assign = {}
+        for j in var:
+            assign[j] = random.choice([True, False])
+            assign[-j] = not assign[j]
+        for k in range(2 * len(var)**2):  # reference slides
+            false_clause_pairs = pick_false_clause(clause_pairs, assign)
+            if not false_clause_pairs:
+                return "satisfiable"
+            else:
+                chosen_var = abs(random.choice(random.choice(false_clause_pairs)))
+                assign[chosen_var] = not assign[chosen_var]
+                assign[-chosen_var] = not assign[chosen_var]
+    return "unsatisfiable"
+
+
+def pick_false_clause(clause_pairs, assign):
+    false_clause = []
+    for i in clause_pairs:
+        if (assign[i[0]] == False) and (assign[i[1]] == False):
+            false_clause.append(i)
+    return false_clause
+
+
+def main():
+    all_clause_pairs = set()
+    with open('2sat1.txt') as file_in:
+        next(file_in)
+        for line in file_in:
+            x, y = map(int, line.strip().split(' '))
+            all_clause_pairs.add((x, y))
+    print(all_clause_pairs)
+    print(type(all_clause_pairs))
+    out = papa(all_clause_pairs)
+    return out
+
+
+if __name__ == "__main__":
+    start = time()
+    print("Main (final out): " + str(main()))
+    print("Time diff: " + str(time() - start))
