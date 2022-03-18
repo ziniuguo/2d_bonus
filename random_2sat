@@ -3,7 +3,7 @@ import random
 from time import time
 
 
-def papa(clause_pairs):
+def random_2sat(clause_pairs):
     var = set()
     for i in clause_pairs:
         for j in i:
@@ -14,39 +14,72 @@ def papa(clause_pairs):
         for j in var:
             assign[j] = random.choice([True, False])
             assign[-j] = not assign[j]
-        for k in range(2 * len(var)**2):  # reference slides
-            false_clause_pairs = pick_false_clause(clause_pairs, assign)
+        for k in range(2 * len(var) ** 2):  # reference slides
+            false_clause_pairs = []
+            for m in clause_pairs:
+                if assign[m[0]] == assign[m[1]] and not assign[m[0]]:
+                    false_clause_pairs.append(m)
             if not false_clause_pairs:
                 return "satisfiable"
             else:
-                chosen_var = abs(random.choice(random.choice(false_clause_pairs)))
-                assign[chosen_var] = not assign[chosen_var]
-                assign[-chosen_var] = not assign[chosen_var]
+                var_to_change = abs(random.choice(random.choice(false_clause_pairs)))
+                assign[var_to_change] = not assign[var_to_change]
+                assign[-var_to_change] = not assign[var_to_change]
     return "unsatisfiable"
 
 
-def pick_false_clause(clause_pairs, assign):
-    false_clause = []
-    for i in clause_pairs:
-        if (assign[i[0]] == False) and (assign[i[1]] == False):
-            false_clause.append(i)
-    return false_clause
+def read_cnf(x):
+    test_data = []
+    l = set()
+    with open(x, 'r') as f:
+        for line in f.readlines():
+            test_data.append(line.strip())  # 把末尾的'\n'删掉
+    A = []
+    B = []
+    n = 0
+    m = 0
+    for rec in test_data:
+        rec = rec.strip()
+        junk_list = []
+        substrs = rec.split()
+        if substrs[0] == 'p' and substrs[1] == 'cnf':
+            n = substrs[2]
+            m = substrs[3]
+        ## record has to start with a number or a minus sign
+        if (rec[0].isdigit()) or (rec[0].startswith("-")):
+            substrs = rec.split()
+            try:
+                if len(substrs) == 3:
+                    for num in range(len(substrs)):
+                        num_int = int(substrs[num])
+                        if num == 0:
+                            A.append(num_int)
+                        elif num == 1:
+                            B.append(num_int)
+                elif len(substrs) == 2:
+                    for num in range(len(substrs)):
+                        num_int = int(substrs[num])
+                        if num == 0:
+                            A.append(num_int)
+                            B.append(num_int)
+            except:
+                print("error converting", rec)
+    for i in range(len(A)):
+        # print((A[i], B[i]))
+        l.add((A[i], B[i]))
+        # print("l",l)
+    return l
 
 
 def main():
-    all_clause_pairs = set()
-    with open('2sat1.txt') as file_in:
-        next(file_in)
-        for line in file_in:
-            x, y = map(int, line.strip().split(' '))
-            all_clause_pairs.add((x, y))
-    print(all_clause_pairs)
+    all_clause_pairs = read_cnf("2satBIG.cnf")
+    print("sets: " + str(all_clause_pairs))
     print(type(all_clause_pairs))
-    out = papa(all_clause_pairs)
+    out = random_2sat(all_clause_pairs)
     return out
 
 
 if __name__ == "__main__":
     start = time()
     print("Main (final out): " + str(main()))
-    print("Time diff: " + str(time() - start))
+    print("Time: " + str(time() - start))
