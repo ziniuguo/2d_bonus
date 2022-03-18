@@ -4,13 +4,6 @@ from time import time
 
 
 def papa(clause_pairs):
-    """
-    Papadimitriou's 2SAT algorithm using the principle of local search.
-
-    Pick a random assignment of the variables and test the satisfiability,
-    if satisfied return satisfiable, otherwise randomly choose a failed
-    clause and randomly choose one of its two variable and flip its value.
-    """
     var = set()
     for i in clause_pairs:
         for j in i:
